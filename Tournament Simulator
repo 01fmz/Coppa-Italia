@@ -530,7 +530,7 @@ View(results_sf)
 
 
 
-   ### Run the code up to line 527 to sim the FINAL ###
+   ### Run the code up to line 602 to sim the FINAL ###
 
 # Define teams and their strengths
 teams <- results_sf$Winner
