@@ -5,7 +5,7 @@ library(dplyr)
 SquadreCoppaItalia <- read.csv("SquadreCoppaItalia.csv")
 
 
-   ### Run the code up to line 77 to sim the FIRST ROUND ###
+### Run the code up to line 77 to sim the FIRST ROUND ###
 
 # Define teams and their strengths
 teams <- SquadreCoppaItalia$Team[SquadreCoppaItalia$Division %in% c("Serie C", "Serie D", "Eccellenza", "Promozione")]
@@ -71,7 +71,7 @@ simulate_round <- function(teams, strengths) {
 results_1r <- simulate_round(teams, strengths)
 
 # Save the results to a CSV file
-write.csv(results, file = "round_try_results.csv", row.names = FALSE)
+write.csv(results, file = "results_1r.csv", row.names = FALSE)
 
 # View the results
 View(results_1r)
@@ -80,11 +80,22 @@ View(results_1r)
 
 
 
-   ### Run the code up to line 152 to sim the SECOND ROUND ###
+### Run the code up to line 163 to sim the SECOND ROUND ###
 
 # Define teams and their strengths
-teams <- bind_rows(SquadreCoppaItalia$Team[SquadreCoppaItalia$Division == "Serie B"], results_1r$Winner)
-strengths <- bind_rows(SquadreCoppaItalia$Strength[SquadreCoppaItalia$Division == "Serie B"], results_1r$WinnerStrength)
+winners_1r <- results_1r %>%
+  rename(Team = Winner) %>%
+  rename(Strength = WinnerStrength) %>%
+  select(Team, Strength)
+
+serieb_teams <- SquadreCoppaItalia %>%
+  filter(Division == "Serie B") %>%
+  select(Team, Strength)
+
+teams_2r <- bind_rows(winners_1r, serieb_teams)
+
+teams <- teams_2r$Team
+strengths <- teams_2r$Strength
 
 # Function to draw matchups
 draw_matches <- function(teams) {
@@ -146,7 +157,7 @@ simulate_round <- function(teams, strengths) {
 results_2r <- simulate_round(teams, strengths)
 
 # Save the results to a CSV file
-write.csv(results, file = "round_try_results.csv", row.names = FALSE)
+write.csv(results, file = "results_r2.csv", row.names = FALSE)
 
 # View the results
 View(results_2r)
@@ -155,11 +166,22 @@ View(results_2r)
 
 
 
-   ### Run the code up to line 227 to sim the ROUND OF 64 ###
+   ### Run the code up to line 249 to sim the ROUND OF 64 ###
 
 # Define teams and their strengths
-teams <- bind_rows(SquadreCoppaItalia$Team[SquadreCoppaItalia$Division == "Serie A"], results_2r$Winner)
-strengths <- bind_rows(SquadreCoppaItalia$Strength[SquadreCoppaItalia$Division == "Serie A"], results_2r$WinnerStrength)
+winners_2r <- results_2r %>%
+  rename(Team = Winner) %>%
+  rename(Strength = WinnerStrength) %>%
+  select(Team, Strength)
+
+seriea_teams <- SquadreCoppaItalia %>%
+  filter(Division == "Serie A") %>%
+  select(Team, Strength)
+
+teams_r64 <- bind_rows(winners_2r, seriea_teams)
+
+teams <- teams_r64$Team
+strengths <- teams_r64$Strength
 
 # Function to draw matchups
 draw_matches <- function(teams) {
@@ -230,11 +252,11 @@ View(results_r64)
 
 
 
-   ### Run the code up to line 302 to sim the ROUND OF 32 ###
+### Run the code up to line 324 to sim the ROUND OF 32 ###
 
 # Define teams and their strengths
 teams <- results_r64$Winner
-strengths <- results_r64$WinnerStrength)
+strengths <- results_r64$WinnerStrength
 
 # Function to draw matchups
 draw_matches <- function(teams) {
@@ -296,7 +318,7 @@ simulate_round <- function(teams, strengths) {
 results_r32 <- simulate_round(teams, strengths)
 
 # Save the results to a CSV file
-write.csv(results, file = "round_try_results.csv", row.names = FALSE)
+write.csv(results, file = "results_r32.csv", row.names = FALSE)
 
 # View the results
 View(results_r32)
@@ -305,11 +327,11 @@ View(results_r32)
 
 
 
-   ### Run the code up to line 377 to sim the ROUND OF 16 ###
+### Run the code up to line 399 to sim the ROUND OF 16 ###
 
 # Define teams and their strengths
 teams <- results_r32$Winner
-strengths <- results_r32$WinnerStrength)
+strengths <- results_r32$WinnerStrength
 
 # Function to draw matchups
 draw_matches <- function(teams) {
@@ -371,7 +393,7 @@ simulate_round <- function(teams, strengths) {
 results_r16 <- simulate_round(teams, strengths)
 
 # Save the results to a CSV file
-write.csv(results, file = "round_try_results.csv", row.names = FALSE)
+write.csv(results, file = "results_r16.csv", row.names = FALSE)
 
 # View the results
 View(results_r16)
@@ -380,11 +402,11 @@ View(results_r16)
 
 
 
-   ### Run the code up to line 452 to sim the QUARTERFINALS ###
+### Run the code up to line 474 to sim the QUARTERFINALS ###
 
 # Define teams and their strengths
 teams <- results_r16$Winner
-strengths <- results_r16$WinnerStrength)
+strengths <- results_r16$WinnerStrength
 
 # Function to draw matchups
 draw_matches <- function(teams) {
@@ -446,7 +468,7 @@ simulate_round <- function(teams, strengths) {
 results_qf <- simulate_round(teams, strengths)
 
 # Save the results to a CSV file
-write.csv(results, file = "round_try_results.csv", row.names = FALSE)
+write.csv(results, file = "results_qf.csv", row.names = FALSE)
 
 # View the results
 View(results_qf)
@@ -455,11 +477,11 @@ View(results_qf)
 
 
 
-   ### Run the code up to line 527 to sim the SEMIFINALS ###
+### Run the code up to line 549 to sim the SEMIFINALS ###
 
 # Define teams and their strengths
 teams <- results_qf$Winner
-strengths <- results_qf$WinnerStrength)
+strengths <- results_qf$WinnerStrength
 
 # Function to draw matchups
 draw_matches <- function(teams) {
@@ -521,7 +543,7 @@ simulate_round <- function(teams, strengths) {
 results_sf <- simulate_round(teams, strengths)
 
 # Save the results to a CSV file
-write.csv(results, file = "round_try_results.csv", row.names = FALSE)
+write.csv(results, file = "results_sf.csv", row.names = FALSE)
 
 # View the results
 View(results_sf)
@@ -530,11 +552,11 @@ View(results_sf)
 
 
 
-   ### Run the code up to line 602 to sim the FINAL ###
+### Run the code up to line 624 to sim the FINAL ###
 
 # Define teams and their strengths
 teams <- results_sf$Winner
-strengths <- results_sf$WinnerStrength)
+strengths <- results_sf$WinnerStrength
 
 # Function to draw matchups
 draw_matches <- function(teams) {
@@ -546,8 +568,8 @@ draw_matches <- function(teams) {
 # Function to generate scores
 generate_scores <- function(home_strength, away_strength) {
   avg_goals <- 2.25 + ( abs(home_strength - away_strength) / 2 )
-  home_goals <- rpois(1, avg_goals * (home_strength*1.1 / (home_strength*1.1 + away_strength)))
-  away_goals <- rpois(1, avg_goals * (away_strength / (home_strength*1.1 + away_strength)))
+  home_goals <- rpois(1, avg_goals * (home_strength / (home_strength + away_strength)))
+  away_goals <- rpois(1, avg_goals * (away_strength / (home_strength + away_strength)))
   return(c(home_goals, away_goals))
 }
 
@@ -596,7 +618,7 @@ simulate_round <- function(teams, strengths) {
 results_f <- simulate_round(teams, strengths)
 
 # Save the results to a CSV file
-write.csv(results, file = "round_try_results.csv", row.names = FALSE)
+write.csv(results, file = "results_f.csv", row.names = FALSE)
 
 # View the results
 View(results_f)
