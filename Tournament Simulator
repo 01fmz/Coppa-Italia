@@ -2,7 +2,7 @@
 library(dplyr)
 
 # Load file with teams
-read.csv()
+SquadreCoppaItalia <- read.csv("SquadreCoppaItalia.csv")
 
 
    ### Run the code up to line 77 to sim the FIRST ROUND ###
