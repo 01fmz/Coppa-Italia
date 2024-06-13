@@ -1,0 +1,602 @@
+# Load necessary library
+library(dplyr)
+
+# Load file with teams
+read.csv()
+
+
+   ### Run the code up to line 77 to sim the FIRST ROUND ###
+
+# Define teams and their strengths
+teams <- SquadreCoppaItalia$Team[SquadreCoppaItalia$Division %in% c("Serie C", "Serie D", "Eccellenza", "Promozione")]
+strengths <- SquadreCoppaItalia$Strength[SquadreCoppaItalia$Division %in% c("Serie C", "Serie D", "Eccellenza", "Promozione")]
+
+# Function to draw matchups
+draw_matches <- function(teams) {
+  shuffled_teams <- sample(teams)
+  matches <- matrix(shuffled_teams, ncol = 2, byrow = TRUE)
+  return(matches)
+}
+
+# Function to generate scores
+generate_scores <- function(home_strength, away_strength) {
+  avg_goals <- 2.25 + ( abs(home_strength - away_strength) / 2 )
+  home_goals <- rpois(1, avg_goals * (home_strength*1.1 / (home_strength*1.1 + away_strength)))
+  away_goals <- rpois(1, avg_goals * (away_strength / (home_strength*1.1 + away_strength)))
+  return(c(home_goals, away_goals))
+}
+
+# Function to determine winner
+determine_winner <- function(home_goals, away_goals, home_team, away_team) {
+  if (home_goals > away_goals) {
+    return(home_team)
+  } else if (away_goals > home_goals) {
+    return(away_team)
+  } else {
+    # Coin flip for draw
+    winner <- sample(c(home_team, away_team), 1)
+    return(winner)
+  }
+}
+
+# Function to simulate a round
+simulate_round <- function(teams, strengths) {
+  matches <- draw_matches(teams)
+  results <- data.frame(HomeTeam = character(), HomeGoals = integer(), AwayGoals = integer(), 
+                        AwayTeam = character(), Winner = character(), WinnerStrength = numeric())
+  
+  for (i in 1:nrow(matches)) {
+    home_team <- matches[i, 1]
+    away_team <- matches[i, 2]
+    home_strength <- 1.1 * strengths[match(home_team, teams)]
+    away_strength <- strengths[match(away_team, teams)]
+    
+    scores <- generate_scores(home_strength, away_strength)
+    home_goals <- scores[1]
+    away_goals <- scores[2]
+    winner <- determine_winner(home_goals, away_goals, home_team, away_team)
+    winner_strength <- strengths[match(winner, teams)]
+    
+    results <- rbind(results, data.frame(HomeTeam = home_team, HomeGoals = home_goals, 
+                                         AwayGoals = away_goals, AwayTeam = away_team, 
+                                         Winner = winner, WinnerStrength = winner_strength))
+  }
+  
+  print(results)
+  
+  return(results)
+}
+
+# Simulate the round
+results_1r <- simulate_round(teams, strengths)
+
+# Save the results to a CSV file
+write.csv(results, file = "round_try_results.csv", row.names = FALSE)
+
+# View the results
+View(results_1r)
+
+
+
+
+
+   ### Run the code up to line 152 to sim the SECOND ROUND ###
+
+# Define teams and their strengths
+teams <- bind_rows(SquadreCoppaItalia$Team[SquadreCoppaItalia$Division == "Serie B"], results_1r$Winner)
+strengths <- bind_rows(SquadreCoppaItalia$Strength[SquadreCoppaItalia$Division == "Serie B"], results_1r$WinnerStrength)
+
+# Function to draw matchups
+draw_matches <- function(teams) {
+  shuffled_teams <- sample(teams)
+  matches <- matrix(shuffled_teams, ncol = 2, byrow = TRUE)
+  return(matches)
+}
+
+# Function to generate scores
+generate_scores <- function(home_strength, away_strength) {
+  avg_goals <- 2.25 + ( abs(home_strength - away_strength) / 2 )
+  home_goals <- rpois(1, avg_goals * (home_strength*1.1 / (home_strength*1.1 + away_strength)))
+  away_goals <- rpois(1, avg_goals * (away_strength / (home_strength*1.1 + away_strength)))
+  return(c(home_goals, away_goals))
+}
+
+# Function to determine winner
+determine_winner <- function(home_goals, away_goals, home_team, away_team) {
+  if (home_goals > away_goals) {
+    return(home_team)
+  } else if (away_goals > home_goals) {
+    return(away_team)
+  } else {
+    # Coin flip for draw
+    winner <- sample(c(home_team, away_team), 1)
+    return(winner)
+  }
+}
+
+# Function to simulate a round
+simulate_round <- function(teams, strengths) {
+  matches <- draw_matches(teams)
+  results <- data.frame(HomeTeam = character(), HomeGoals = integer(), AwayGoals = integer(), 
+                        AwayTeam = character(), Winner = character(), WinnerStrength = numeric())
+  
+  for (i in 1:nrow(matches)) {
+    home_team <- matches[i, 1]
+    away_team <- matches[i, 2]
+    home_strength <- 1.1 * strengths[match(home_team, teams)]
+    away_strength <- strengths[match(away_team, teams)]
+    
+    scores <- generate_scores(home_strength, away_strength)
+    home_goals <- scores[1]
+    away_goals <- scores[2]
+    winner <- determine_winner(home_goals, away_goals, home_team, away_team)
+    winner_strength <- strengths[match(winner, teams)]
+    
+    results <- rbind(results, data.frame(HomeTeam = home_team, HomeGoals = home_goals, 
+                                         AwayGoals = away_goals, AwayTeam = away_team, 
+                                         Winner = winner, WinnerStrength = winner_strength))
+  }
+  
+  print(results)
+  
+  return(results)
+}
+
+# Simulate the round
+results_2r <- simulate_round(teams, strengths)
+
+# Save the results to a CSV file
+write.csv(results, file = "round_try_results.csv", row.names = FALSE)
+
+# View the results
+View(results_2r)
+
+
+
+
+
+   ### Run the code up to line 227 to sim the ROUND OF 64 ###
+
+# Define teams and their strengths
+teams <- bind_rows(SquadreCoppaItalia$Team[SquadreCoppaItalia$Division == "Serie A"], results_2r$Winner)
+strengths <- bind_rows(SquadreCoppaItalia$Strength[SquadreCoppaItalia$Division == "Serie A"], results_2r$WinnerStrength)
+
+# Function to draw matchups
+draw_matches <- function(teams) {
+  shuffled_teams <- sample(teams)
+  matches <- matrix(shuffled_teams, ncol = 2, byrow = TRUE)
+  return(matches)
+}
+
+# Function to generate scores
+generate_scores <- function(home_strength, away_strength) {
+  avg_goals <- 2.25 + ( abs(home_strength - away_strength) / 2 )
+  home_goals <- rpois(1, avg_goals * (home_strength*1.1 / (home_strength*1.1 + away_strength)))
+  away_goals <- rpois(1, avg_goals * (away_strength / (home_strength*1.1 + away_strength)))
+  return(c(home_goals, away_goals))
+}
+
+# Function to determine winner
+determine_winner <- function(home_goals, away_goals, home_team, away_team) {
+  if (home_goals > away_goals) {
+    return(home_team)
+  } else if (away_goals > home_goals) {
+    return(away_team)
+  } else {
+    # Coin flip for draw
+    winner <- sample(c(home_team, away_team), 1)
+    return(winner)
+  }
+}
+
+# Function to simulate a round
+simulate_round <- function(teams, strengths) {
+  matches <- draw_matches(teams)
+  results <- data.frame(HomeTeam = character(), HomeGoals = integer(), AwayGoals = integer(), 
+                        AwayTeam = character(), Winner = character(), WinnerStrength = numeric())
+  
+  for (i in 1:nrow(matches)) {
+    home_team <- matches[i, 1]
+    away_team <- matches[i, 2]
+    home_strength <- 1.1 * strengths[match(home_team, teams)]
+    away_strength <- strengths[match(away_team, teams)]
+    
+    scores <- generate_scores(home_strength, away_strength)
+    home_goals <- scores[1]
+    away_goals <- scores[2]
+    winner <- determine_winner(home_goals, away_goals, home_team, away_team)
+    winner_strength <- strengths[match(winner, teams)]
+    
+    results <- rbind(results, data.frame(HomeTeam = home_team, HomeGoals = home_goals, 
+                                         AwayGoals = away_goals, AwayTeam = away_team, 
+                                         Winner = winner, WinnerStrength = winner_strength))
+  }
+  
+  print(results)
+  
+  return(results)
+}
+
+# Simulate the round
+results_r64 <- simulate_round(teams, strengths)
+
+# Save the results to a CSV file
+write.csv(results, file = "round_try_results.csv", row.names = FALSE)
+
+# View the results
+View(results_r64)
+
+
+
+
+
+   ### Run the code up to line 302 to sim the ROUND OF 32 ###
+
+# Define teams and their strengths
+teams <- results_r64$Winner
+strengths <- results_r64$WinnerStrength)
+
+# Function to draw matchups
+draw_matches <- function(teams) {
+  shuffled_teams <- sample(teams)
+  matches <- matrix(shuffled_teams, ncol = 2, byrow = TRUE)
+  return(matches)
+}
+
+# Function to generate scores
+generate_scores <- function(home_strength, away_strength) {
+  avg_goals <- 2.25 + ( abs(home_strength - away_strength) / 2 )
+  home_goals <- rpois(1, avg_goals * (home_strength*1.1 / (home_strength*1.1 + away_strength)))
+  away_goals <- rpois(1, avg_goals * (away_strength / (home_strength*1.1 + away_strength)))
+  return(c(home_goals, away_goals))
+}
+
+# Function to determine winner
+determine_winner <- function(home_goals, away_goals, home_team, away_team) {
+  if (home_goals > away_goals) {
+    return(home_team)
+  } else if (away_goals > home_goals) {
+    return(away_team)
+  } else {
+    # Coin flip for draw
+    winner <- sample(c(home_team, away_team), 1)
+    return(winner)
+  }
+}
+
+# Function to simulate a round
+simulate_round <- function(teams, strengths) {
+  matches <- draw_matches(teams)
+  results <- data.frame(HomeTeam = character(), HomeGoals = integer(), AwayGoals = integer(), 
+                        AwayTeam = character(), Winner = character(), WinnerStrength = numeric())
+  
+  for (i in 1:nrow(matches)) {
+    home_team <- matches[i, 1]
+    away_team <- matches[i, 2]
+    home_strength <- 1.1 * strengths[match(home_team, teams)]
+    away_strength <- strengths[match(away_team, teams)]
+    
+    scores <- generate_scores(home_strength, away_strength)
+    home_goals <- scores[1]
+    away_goals <- scores[2]
+    winner <- determine_winner(home_goals, away_goals, home_team, away_team)
+    winner_strength <- strengths[match(winner, teams)]
+    
+    results <- rbind(results, data.frame(HomeTeam = home_team, HomeGoals = home_goals, 
+                                         AwayGoals = away_goals, AwayTeam = away_team, 
+                                         Winner = winner, WinnerStrength = winner_strength))
+  }
+  
+  print(results)
+  
+  return(results)
+}
+
+# Simulate the round
+results_r32 <- simulate_round(teams, strengths)
+
+# Save the results to a CSV file
+write.csv(results, file = "round_try_results.csv", row.names = FALSE)
+
+# View the results
+View(results_r32)
+
+
+
+
+
+   ### Run the code up to line 377 to sim the ROUND OF 16 ###
+
+# Define teams and their strengths
+teams <- results_r32$Winner
+strengths <- results_r32$WinnerStrength)
+
+# Function to draw matchups
+draw_matches <- function(teams) {
+  shuffled_teams <- sample(teams)
+  matches <- matrix(shuffled_teams, ncol = 2, byrow = TRUE)
+  return(matches)
+}
+
+# Function to generate scores
+generate_scores <- function(home_strength, away_strength) {
+  avg_goals <- 2.25 + ( abs(home_strength - away_strength) / 2 )
+  home_goals <- rpois(1, avg_goals * (home_strength*1.1 / (home_strength*1.1 + away_strength)))
+  away_goals <- rpois(1, avg_goals * (away_strength / (home_strength*1.1 + away_strength)))
+  return(c(home_goals, away_goals))
+}
+
+# Function to determine winner
+determine_winner <- function(home_goals, away_goals, home_team, away_team) {
+  if (home_goals > away_goals) {
+    return(home_team)
+  } else if (away_goals > home_goals) {
+    return(away_team)
+  } else {
+    # Coin flip for draw
+    winner <- sample(c(home_team, away_team), 1)
+    return(winner)
+  }
+}
+
+# Function to simulate a round
+simulate_round <- function(teams, strengths) {
+  matches <- draw_matches(teams)
+  results <- data.frame(HomeTeam = character(), HomeGoals = integer(), AwayGoals = integer(), 
+                        AwayTeam = character(), Winner = character(), WinnerStrength = numeric())
+  
+  for (i in 1:nrow(matches)) {
+    home_team <- matches[i, 1]
+    away_team <- matches[i, 2]
+    home_strength <- 1.1 * strengths[match(home_team, teams)]
+    away_strength <- strengths[match(away_team, teams)]
+    
+    scores <- generate_scores(home_strength, away_strength)
+    home_goals <- scores[1]
+    away_goals <- scores[2]
+    winner <- determine_winner(home_goals, away_goals, home_team, away_team)
+    winner_strength <- strengths[match(winner, teams)]
+    
+    results <- rbind(results, data.frame(HomeTeam = home_team, HomeGoals = home_goals, 
+                                         AwayGoals = away_goals, AwayTeam = away_team, 
+                                         Winner = winner, WinnerStrength = winner_strength))
+  }
+  
+  print(results)
+  
+  return(results)
+}
+
+# Simulate the round
+results_r16 <- simulate_round(teams, strengths)
+
+# Save the results to a CSV file
+write.csv(results, file = "round_try_results.csv", row.names = FALSE)
+
+# View the results
+View(results_r16)
+
+
+
+
+
+   ### Run the code up to line 452 to sim the QUARTERFINALS ###
+
+# Define teams and their strengths
+teams <- results_r16$Winner
+strengths <- results_r16$WinnerStrength)
+
+# Function to draw matchups
+draw_matches <- function(teams) {
+  shuffled_teams <- sample(teams)
+  matches <- matrix(shuffled_teams, ncol = 2, byrow = TRUE)
+  return(matches)
+}
+
+# Function to generate scores
+generate_scores <- function(home_strength, away_strength) {
+  avg_goals <- 2.25 + ( abs(home_strength - away_strength) / 2 )
+  home_goals <- rpois(1, avg_goals * (home_strength*1.1 / (home_strength*1.1 + away_strength)))
+  away_goals <- rpois(1, avg_goals * (away_strength / (home_strength*1.1 + away_strength)))
+  return(c(home_goals, away_goals))
+}
+
+# Function to determine winner
+determine_winner <- function(home_goals, away_goals, home_team, away_team) {
+  if (home_goals > away_goals) {
+    return(home_team)
+  } else if (away_goals > home_goals) {
+    return(away_team)
+  } else {
+    # Coin flip for draw
+    winner <- sample(c(home_team, away_team), 1)
+    return(winner)
+  }
+}
+
+# Function to simulate a round
+simulate_round <- function(teams, strengths) {
+  matches <- draw_matches(teams)
+  results <- data.frame(HomeTeam = character(), HomeGoals = integer(), AwayGoals = integer(), 
+                        AwayTeam = character(), Winner = character(), WinnerStrength = numeric())
+  
+  for (i in 1:nrow(matches)) {
+    home_team <- matches[i, 1]
+    away_team <- matches[i, 2]
+    home_strength <- 1.1 * strengths[match(home_team, teams)]
+    away_strength <- strengths[match(away_team, teams)]
+    
+    scores <- generate_scores(home_strength, away_strength)
+    home_goals <- scores[1]
+    away_goals <- scores[2]
+    winner <- determine_winner(home_goals, away_goals, home_team, away_team)
+    winner_strength <- strengths[match(winner, teams)]
+    
+    results <- rbind(results, data.frame(HomeTeam = home_team, HomeGoals = home_goals, 
+                                         AwayGoals = away_goals, AwayTeam = away_team, 
+                                         Winner = winner, WinnerStrength = winner_strength))
+  }
+  
+  print(results)
+  
+  return(results)
+}
+
+# Simulate the round
+results_qf <- simulate_round(teams, strengths)
+
+# Save the results to a CSV file
+write.csv(results, file = "round_try_results.csv", row.names = FALSE)
+
+# View the results
+View(results_qf)
+
+
+
+
+
+   ### Run the code up to line 527 to sim the SEMIFINALS ###
+
+# Define teams and their strengths
+teams <- results_qf$Winner
+strengths <- results_qf$WinnerStrength)
+
+# Function to draw matchups
+draw_matches <- function(teams) {
+  shuffled_teams <- sample(teams)
+  matches <- matrix(shuffled_teams, ncol = 2, byrow = TRUE)
+  return(matches)
+}
+
+# Function to generate scores
+generate_scores <- function(home_strength, away_strength) {
+  avg_goals <- 2.25 + ( abs(home_strength - away_strength) / 2 )
+  home_goals <- rpois(1, avg_goals * (home_strength*1.1 / (home_strength*1.1 + away_strength)))
+  away_goals <- rpois(1, avg_goals * (away_strength / (home_strength*1.1 + away_strength)))
+  return(c(home_goals, away_goals))
+}
+
+# Function to determine winner
+determine_winner <- function(home_goals, away_goals, home_team, away_team) {
+  if (home_goals > away_goals) {
+    return(home_team)
+  } else if (away_goals > home_goals) {
+    return(away_team)
+  } else {
+    # Coin flip for draw
+    winner <- sample(c(home_team, away_team), 1)
+    return(winner)
+  }
+}
+
+# Function to simulate a round
+simulate_round <- function(teams, strengths) {
+  matches <- draw_matches(teams)
+  results <- data.frame(HomeTeam = character(), HomeGoals = integer(), AwayGoals = integer(), 
+                        AwayTeam = character(), Winner = character(), WinnerStrength = numeric())
+  
+  for (i in 1:nrow(matches)) {
+    home_team <- matches[i, 1]
+    away_team <- matches[i, 2]
+    home_strength <- 1.1 * strengths[match(home_team, teams)]
+    away_strength <- strengths[match(away_team, teams)]
+    
+    scores <- generate_scores(home_strength, away_strength)
+    home_goals <- scores[1]
+    away_goals <- scores[2]
+    winner <- determine_winner(home_goals, away_goals, home_team, away_team)
+    winner_strength <- strengths[match(winner, teams)]
+    
+    results <- rbind(results, data.frame(HomeTeam = home_team, HomeGoals = home_goals, 
+                                         AwayGoals = away_goals, AwayTeam = away_team, 
+                                         Winner = winner, WinnerStrength = winner_strength))
+  }
+  
+  print(results)
+  
+  return(results)
+}
+
+# Simulate the round
+results_sf <- simulate_round(teams, strengths)
+
+# Save the results to a CSV file
+write.csv(results, file = "round_try_results.csv", row.names = FALSE)
+
+# View the results
+View(results_sf)
+
+
+
+
+
+   ### Run the code up to line 527 to sim the FINAL ###
+
+# Define teams and their strengths
+teams <- results_sf$Winner
+strengths <- results_sf$WinnerStrength)
+
+# Function to draw matchups
+draw_matches <- function(teams) {
+  shuffled_teams <- sample(teams)
+  matches <- matrix(shuffled_teams, ncol = 2, byrow = TRUE)
+  return(matches)
+}
+
+# Function to generate scores
+generate_scores <- function(home_strength, away_strength) {
+  avg_goals <- 2.25 + ( abs(home_strength - away_strength) / 2 )
+  home_goals <- rpois(1, avg_goals * (home_strength*1.1 / (home_strength*1.1 + away_strength)))
+  away_goals <- rpois(1, avg_goals * (away_strength / (home_strength*1.1 + away_strength)))
+  return(c(home_goals, away_goals))
+}
+
+# Function to determine winner
+determine_winner <- function(home_goals, away_goals, home_team, away_team) {
+  if (home_goals > away_goals) {
+    return(home_team)
+  } else if (away_goals > home_goals) {
+    return(away_team)
+  } else {
+    # Coin flip for draw
+    winner <- sample(c(home_team, away_team), 1)
+    return(winner)
+  }
+}
+
+# Function to simulate a round
+simulate_round <- function(teams, strengths) {
+  matches <- draw_matches(teams)
+  results <- data.frame(HomeTeam = character(), HomeGoals = integer(), AwayGoals = integer(), 
+                        AwayTeam = character(), Winner = character(), WinnerStrength = numeric())
+  
+  for (i in 1:nrow(matches)) {
+    home_team <- matches[i, 1]
+    away_team <- matches[i, 2]
+    home_strength <- 1.1 * strengths[match(home_team, teams)]
+    away_strength <- strengths[match(away_team, teams)]
+    
+    scores <- generate_scores(home_strength, away_strength)
+    home_goals <- scores[1]
+    away_goals <- scores[2]
+    winner <- determine_winner(home_goals, away_goals, home_team, away_team)
+    winner_strength <- strengths[match(winner, teams)]
+    
+    results <- rbind(results, data.frame(HomeTeam = home_team, HomeGoals = home_goals, 
+                                         AwayGoals = away_goals, AwayTeam = away_team, 
+                                         Winner = winner, WinnerStrength = winner_strength))
+  }
+  
+  print(results)
+  
+  return(results)
+}
+
+# Simulate the round
+results_f <- simulate_round(teams, strengths)
+
+# Save the results to a CSV file
+write.csv(results, file = "round_try_results.csv", row.names = FALSE)
+
+# View the results
+View(results_f)
