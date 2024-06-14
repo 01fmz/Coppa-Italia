@@ -1,11 +1,11 @@
 # Load necessary library
 library(dplyr)
 
-# Load file with teams
+# Load file with teams (download the csv file first)
 SquadreCoppaItalia <- read.csv("SquadreCoppaItalia.csv")
 
 
-### Run the code up to line 77 to sim the FIRST ROUND ###
+### FIRST ROUND ###
 
 # Define teams and their strengths
 teams <- SquadreCoppaItalia$Team[SquadreCoppaItalia$Division %in% c("Serie C", "Serie D", "Eccellenza", "Promozione")]
@@ -80,7 +80,7 @@ View(results_1r)
 
 
 
-### Run the code up to line 163 to sim the SECOND ROUND ###
+### SECOND ROUND ###
 
 # Define teams and their strengths
 winners_1r <- results_1r %>%
@@ -166,7 +166,7 @@ View(results_2r)
 
 
 
-   ### Run the code up to line 249 to sim the ROUND OF 64 ###
+### ROUND OF 64 ###
 
 # Define teams and their strengths
 winners_2r <- results_2r %>%
@@ -252,7 +252,7 @@ View(results_r64)
 
 
 
-### Run the code up to line 324 to sim the ROUND OF 32 ###
+### ROUND OF 32 ###
 
 # Define teams and their strengths
 teams <- results_r64$Winner
@@ -327,7 +327,7 @@ View(results_r32)
 
 
 
-### Run the code up to line 399 to sim the ROUND OF 16 ###
+### ROUND OF 16 ###
 
 # Define teams and their strengths
 teams <- results_r32$Winner
@@ -402,7 +402,7 @@ View(results_r16)
 
 
 
-### Run the code up to line 474 to sim the QUARTERFINALS ###
+### QUARTERFINALS ###
 
 # Define teams and their strengths
 teams <- results_r16$Winner
@@ -477,7 +477,7 @@ View(results_qf)
 
 
 
-### Run the code up to line 549 to sim the SEMIFINALS ###
+### SEMIFINALS ###
 
 # Define teams and their strengths
 teams <- results_qf$Winner
@@ -552,7 +552,7 @@ View(results_sf)
 
 
 
-### Run the code up to line 624 to sim the FINAL ###
+### FINAL ###
 
 # Define teams and their strengths
 teams <- results_sf$Winner
