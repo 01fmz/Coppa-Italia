@@ -1,8 +1,6 @@
 # Load necessary library
 library(dplyr)
-
-# Load file with teams (download the csv file first)
-SquadreCoppaItalia <- read.csv("SquadreCoppaItalia.csv")
+library(tidyr)
 
 
 ### FIRST ROUND ###
@@ -79,23 +77,11 @@ View(results_1r)
 
 
 
-
 ### SECOND ROUND ###
 
 # Define teams and their strengths
-winners_1r <- results_1r %>%
-  rename(Team = Winner) %>%
-  rename(Strength = WinnerStrength) %>%
-  select(Team, Strength)
-
-serieb_teams <- SquadreCoppaItalia %>%
-  filter(Division == "Serie B") %>%
-  select(Team, Strength)
-
-teams_2r <- bind_rows(winners_1r, serieb_teams)
-
-teams <- teams_2r$Team
-strengths <- teams_2r$Strength
+teams <- results_1r$Winner
+strengths <- results_1r$WinnerStrength
 
 # Function to draw matchups
 draw_matches <- function(teams) {
@@ -157,7 +143,7 @@ simulate_round <- function(teams, strengths) {
 results_2r <- simulate_round(teams, strengths)
 
 # Save the results to a CSV file
-write.csv(results, file = "results_r2.csv", row.names = FALSE)
+write.csv(results, file = "results_2r.csv", row.names = FALSE)
 
 # View the results
 View(results_2r)
@@ -166,10 +152,171 @@ View(results_2r)
 
 
 
-### ROUND OF 64 ###
+### THIRD ROUND ###
 
 # Define teams and their strengths
 winners_2r <- results_2r %>%
+  rename(Team = Winner) %>%
+  rename(Strength = WinnerStrength) %>%
+  select(Team, Strength)
+
+serieb_teams <- SquadreCoppaItalia %>%
+  filter(Division == "Serie B") %>%
+  select(Team, Strength)
+
+teams_3r <- bind_rows(winners_2r, serieb_teams)
+
+teams <- teams_3r$Team
+strengths <- teams_3r$Strength
+
+# Function to draw matchups
+draw_matches <- function(teams) {
+  shuffled_teams <- sample(teams)
+  matches <- matrix(shuffled_teams, ncol = 2, byrow = TRUE)
+  return(matches)
+}
+
+# Function to generate scores
+generate_scores <- function(home_strength, away_strength) {
+  avg_goals <- 2.25 + ( abs(home_strength - away_strength) / 2 )
+  home_goals <- rpois(1, avg_goals * (home_strength*1.1 / (home_strength*1.1 + away_strength)))
+  away_goals <- rpois(1, avg_goals * (away_strength / (home_strength*1.1 + away_strength)))
+  return(c(home_goals, away_goals))
+}
+
+# Function to determine winner
+determine_winner <- function(home_goals, away_goals, home_team, away_team) {
+  if (home_goals > away_goals) {
+    return(home_team)
+  } else if (away_goals > home_goals) {
+    return(away_team)
+  } else {
+    # Coin flip for draw
+    winner <- sample(c(home_team, away_team), 1)
+    return(winner)
+  }
+}
+
+# Function to simulate a round
+simulate_round <- function(teams, strengths) {
+  matches <- draw_matches(teams)
+  results <- data.frame(HomeTeam = character(), HomeGoals = integer(), AwayGoals = integer(), 
+                        AwayTeam = character(), Winner = character(), WinnerStrength = numeric())
+  
+  for (i in 1:nrow(matches)) {
+    home_team <- matches[i, 1]
+    away_team <- matches[i, 2]
+    home_strength <- 1.1 * strengths[match(home_team, teams)]
+    away_strength <- strengths[match(away_team, teams)]
+    
+    scores <- generate_scores(home_strength, away_strength)
+    home_goals <- scores[1]
+    away_goals <- scores[2]
+    winner <- determine_winner(home_goals, away_goals, home_team, away_team)
+    winner_strength <- strengths[match(winner, teams)]
+    
+    results <- rbind(results, data.frame(HomeTeam = home_team, HomeGoals = home_goals, 
+                                         AwayGoals = away_goals, AwayTeam = away_team, 
+                                         Winner = winner, WinnerStrength = winner_strength))
+  }
+  
+  print(results)
+  
+  return(results)
+}
+
+# Simulate the round
+results_3r <- simulate_round(teams, strengths)
+
+# Save the results to a CSV file
+write.csv(results, file = "results_3r.csv", row.names = FALSE)
+
+# View the results
+View(results_3r)
+
+
+
+
+### FOURTH ROUND ###
+
+# Define teams and their strengths
+teams <- results_3r$Winner
+strengths <- results_3r$WinnerStrength
+
+# Function to draw matchups
+draw_matches <- function(teams) {
+  shuffled_teams <- sample(teams)
+  matches <- matrix(shuffled_teams, ncol = 2, byrow = TRUE)
+  return(matches)
+}
+
+# Function to generate scores
+generate_scores <- function(home_strength, away_strength) {
+  avg_goals <- 2.25 + ( abs(home_strength - away_strength) / 2 )
+  home_goals <- rpois(1, avg_goals * (home_strength*1.1 / (home_strength*1.1 + away_strength)))
+  away_goals <- rpois(1, avg_goals * (away_strength / (home_strength*1.1 + away_strength)))
+  return(c(home_goals, away_goals))
+}
+
+# Function to determine winner
+determine_winner <- function(home_goals, away_goals, home_team, away_team) {
+  if (home_goals > away_goals) {
+    return(home_team)
+  } else if (away_goals > home_goals) {
+    return(away_team)
+  } else {
+    # Coin flip for draw
+    winner <- sample(c(home_team, away_team), 1)
+    return(winner)
+  }
+}
+
+# Function to simulate a round
+simulate_round <- function(teams, strengths) {
+  matches <- draw_matches(teams)
+  results <- data.frame(HomeTeam = character(), HomeGoals = integer(), AwayGoals = integer(), 
+                        AwayTeam = character(), Winner = character(), WinnerStrength = numeric())
+  
+  for (i in 1:nrow(matches)) {
+    home_team <- matches[i, 1]
+    away_team <- matches[i, 2]
+    home_strength <- 1.1 * strengths[match(home_team, teams)]
+    away_strength <- strengths[match(away_team, teams)]
+    
+    scores <- generate_scores(home_strength, away_strength)
+    home_goals <- scores[1]
+    away_goals <- scores[2]
+    winner <- determine_winner(home_goals, away_goals, home_team, away_team)
+    winner_strength <- strengths[match(winner, teams)]
+    
+    results <- rbind(results, data.frame(HomeTeam = home_team, HomeGoals = home_goals, 
+                                         AwayGoals = away_goals, AwayTeam = away_team, 
+                                         Winner = winner, WinnerStrength = winner_strength))
+  }
+  
+  print(results)
+  
+  return(results)
+}
+
+# Simulate the round
+results_4r <- simulate_round(teams, strengths)
+
+# Save the results to a CSV file
+write.csv(results, file = "results_4r.csv", row.names = FALSE)
+
+# View the results
+View(results_4r)
+
+
+
+
+
+
+### ROUND OF 64 ###
+
+# Define teams and their strengths
+winners_4r <- results_4r %>%
   rename(Team = Winner) %>%
   rename(Strength = WinnerStrength) %>%
   select(Team, Strength)
@@ -178,7 +325,7 @@ seriea_teams <- SquadreCoppaItalia %>%
   filter(Division == "Serie A") %>%
   select(Team, Strength)
 
-teams_r64 <- bind_rows(winners_2r, seriea_teams)
+teams_r64 <- bind_rows(winners_4r, seriea_teams)
 
 teams <- teams_r64$Team
 strengths <- teams_r64$Strength
